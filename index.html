@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f5f3">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>急救题库 · 试用版</title>
+<style>
+:root{
+  --bg:#f6f5f3; --card:#fff; --ink:#171717; --muted:#8c8a86; --line:#ecebe8;
+  --accent:#ff2442; --accent-soft:#fff0f2;
+  --green:#0f9d58; --green-bg:#eaf7f0; --green-line:#8fcca9;
+  --head-h:100px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-snap-type:y proximity;scroll-padding-top:calc(var(--head-h) + 8px);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased}
+button{font-family:inherit}
+a{color:inherit}
+
+/* ---------- top bars ---------- */
+.topbar{position:sticky;top:0;z-index:30;background:rgba(246,245,243,.94);
+  -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+  border-bottom:1px solid rgba(0,0,0,.05);padding-top:env(safe-area-inset-top)}
+.home-head{max-width:680px;margin:0 auto;padding:10px 16px 12px}
+.brand-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-size:20px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;gap:9px}
+.brand .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px #ffe8ec}
+.brand small{font-size:11px;font-weight:500;color:var(--muted);margin-left:1px;letter-spacing:0}
+.count{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.count b{color:var(--ink);font-size:16px;font-weight:800}
+.search{display:flex;align-items:center;gap:8px;margin-top:10px;background:#fff;border:1px solid var(--line);
+  border-radius:12px;padding:0 11px;height:40px}
+.search svg{flex:0 0 auto;width:16px;height:16px;stroke:#a5a29c;fill:none;stroke-width:2;stroke-linecap:round}
+.search input{flex:1;min-width:0;border:0;outline:0;background:transparent;font-size:16px;color:var(--ink);
+  height:100%;-webkit-appearance:none;appearance:none;border-radius:0}
+.search input::placeholder{color:#b3b0aa;font-size:15px}
+.search input::-webkit-search-cancel-button{display:none}
+.clear[hidden]{display:none}
+.clear{display:grid;place-items:center;flex:0 0 auto;width:24px;height:24px;border:0;border-radius:50%;
+  background:#eeece8;color:#8c8a86;font-size:11px;cursor:pointer;padding:0}
+
+.subbar-inner{display:flex;align-items:center;gap:10px;max-width:680px;margin:0 auto;padding:9px 12px}
+.icon-btn{flex:0 0 auto;width:34px;height:34px;border-radius:50%;background:#fff;border:1px solid var(--line);
+  color:#55524d;font-size:20px;line-height:1;display:grid;place-items:center;cursor:pointer;padding:0 0 2px}
+.icon-btn:active{transform:scale(.95)}
+.bar-title{flex:1;min-width:0}
+.crumb{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-title h1{font-size:16px;margin:1px 0 0;font-weight:800;line-height:1.3;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-count{flex:0 0 auto;font-size:12px;color:var(--muted);white-space:nowrap}
+
+/* ---------- pages ---------- */
+.page{max-width:680px;margin:0 auto;padding:12px 14px calc(30px + env(safe-area-inset-bottom))}
+.list-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  padding:4px 4px 10px;font-size:12px;color:var(--muted)}
+.list-head b{font-size:13px;font-weight:700;color:var(--ink)}
+
+.ch-card{display:flex;align-items:center;gap:13px;width:100%;background:#fff;border:0;border-radius:18px;
+  padding:15px 14px;margin-bottom:10px;text-align:left;cursor:pointer;
+  box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.04);transition:transform .12s}
+.ch-card:active{transform:scale(.99)}
+.ch-card.locked{background:#f1f0ed;box-shadow:none;cursor:not-allowed;opacity:.86}
+.ch-card.locked:active{transform:none}
+.ch-card.locked .ch-num{background:#e6e3df;color:#aaa69f}
+.ch-card.locked .ch-title{color:#9f9b95}
+.ch-card.locked .ch-sub{color:#b1ada6}
+.ch-lock{flex:0 0 auto;font-size:10px;font-weight:600;color:#8f8b84;background:#e6e3df;
+  border-radius:6px;padding:4px 7px;white-space:nowrap}
+.count-total{font-size:12px;color:var(--muted);font-weight:500}
+.trial-note{margin-top:16px;font-size:12px;color:var(--muted);line-height:1.7}
+.ch-num{flex:0 0 auto;width:44px;height:44px;border-radius:13px;background:var(--accent-soft);color:var(--accent);
+  display:grid;place-items:center;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+.ch-main{flex:1;min-width:0}
+.ch-title{display:block;font-size:16px;font-weight:700;line-height:1.4;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch-sub{display:block;font-size:12px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
+.chev{flex:0 0 auto;color:#c8c4be;font-size:20px;line-height:1}
+
+.sec-list{background:#fff;border-radius:20px;overflow:hidden;
+  box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.04)}
+.sec-row{display:flex;align-items:center;gap:10px;width:100%;padding:15px 16px;background:#fff;border:0;
+  border-bottom:1px solid #f2f0ec;text-align:left;cursor:pointer}
+.sec-row:last-child{border-bottom:0}
+.sec-row:active{background:#faf9f7}
+.sec-main{flex:1;min-width:0}
+.sec-title{display:block;font-size:14.5px;font-weight:600;line-height:1.45;color:var(--ink)}
+.sec-sub{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}
+
+/* ---------- question feed ---------- */
+.feed{max-width:680px;margin:0 auto;padding:10px 14px calc(30px + env(safe-area-inset-bottom))}
+.card{scroll-snap-align:start;background:var(--card);border-radius:22px;padding:20px 18px 16px;
+  margin-bottom:14px;min-height:calc(100dvh - var(--head-h) - 30px);display:flex;flex-direction:column;
+  box-shadow:0 1px 2px rgba(0,0,0,.04),0 10px 32px rgba(0,0,0,.045);
+  animation:rise .22s ease both;transition:box-shadow .3s}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card.jump{box-shadow:0 0 0 3px rgba(255,36,66,.28),0 10px 32px rgba(0,0,0,.06)}
+.meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}
+.chapter{font-size:11.5px;color:var(--muted);letter-spacing:.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meta-right{display:flex;align-items:center;gap:7px;flex:0 0 auto}
+.tag{font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:6px;letter-spacing:.03em;white-space:nowrap}
+.tag.single{color:#2563eb;background:#eef4ff}
+.tag.multi{color:#b45309;background:#fff6e5}
+.tag.judge{color:#7c3aed;background:#f3edff}
+.qnum{color:#c9c6c0;font-size:10.5px;font-variant-numeric:tabular-nums}
+.q{font-size:19.5px;line-height:1.62;font-weight:700;margin:0 0 16px;letter-spacing:-.01em;overflow-wrap:anywhere}
+mark{background:#ffedb0;color:inherit;border-radius:3px;padding:0 1px}
+
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;
+  background:#faf9f7;border:1.5px solid transparent;border-radius:14px;padding:13px 14px;
+  font-size:15.5px;line-height:1.55;color:#5f5c57}
+.opt .key{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:#eeece8;color:#8a877f;
+  display:grid;place-items:center;font-size:12px;font-weight:800;margin-top:-1px}
+.opt .txt{flex:1;padding-top:1px;overflow-wrap:anywhere}
+.opt .mark{flex:0 0 auto;font-weight:800;font-size:16px;color:var(--green);padding-top:0;visibility:hidden}
+.opt.correct{background:var(--green-bg);border-color:var(--green-line);color:var(--ink);font-weight:600}
+.opt.correct .key{background:var(--green);color:#fff}
+.opt.correct .mark{visibility:visible}
+
+.swipe-hint{margin-top:auto;padding-top:20px;text-align:center;font-size:12px;color:#c7c3bd;letter-spacing:.06em}
+
+.end-card{background:#fff;border-radius:22px;padding:34px 22px 26px;text-align:center;
+  box-shadow:0 1px 2px rgba(0,0,0,.04),0 10px 32px rgba(0,0,0,.045);margin-top:4px}
+.end-ic{width:44px;height:44px;border-radius:50%;background:var(--green-bg);color:var(--green);
+  display:grid;place-items:center;font-size:20px;font-weight:800;margin:0 auto 12px}
+.end-card b{display:block;font-size:17px;font-weight:800}
+.end-card p{font-size:12.5px;color:var(--muted);margin:6px 0 18px}
+.btn{display:block;width:100%;border-radius:13px;padding:13px;font-size:14.5px;font-weight:700;
+  cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink);margin-top:9px}
+.btn.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn:active{transform:scale(.995)}
+
+/* ---------- search results ---------- */
+.res-list{display:flex;flex-direction:column;gap:10px}
+.res{display:block;background:#fff;border-radius:16px;padding:14px 15px;text-decoration:none;color:inherit;
+  box-shadow:0 1px 2px rgba(0,0,0,.04),0 6px 20px rgba(0,0,0,.035);transition:transform .12s}
+.res:active{transform:scale(.995)}
+.res-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.res-path{font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.res-q{font-size:14.5px;font-weight:600;line-height:1.55;margin-top:7px;overflow-wrap:anywhere}
+.res-ans{display:flex;align-items:baseline;gap:6px;margin-top:8px;font-size:12.5px;color:var(--green);min-width:0}
+.res-ans .lab{color:var(--muted);font-size:11.5px;flex:0 0 auto}
+.res-ans b{font-weight:800;flex:0 0 auto}
+.res-text{color:#6c8f7b;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+
+.profile{margin:26px 0 8px;padding:20px 18px;background:#fff;border-radius:18px;text-align:center;
+  box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.04)}
+.profile-label{font-size:11px;color:var(--muted);letter-spacing:.08em}
+.profile-id{display:inline-flex;align-items:center;gap:8px;margin-top:9px;border:0;background:transparent;
+  color:var(--ink);font-size:19px;font-weight:800;letter-spacing:.04em;font-variant-numeric:tabular-nums;
+  cursor:pointer;padding:3px 6px;border-radius:8px}
+.profile-id:active{background:#faf8f5}
+.profile-id .copy{font-size:10.5px;font-weight:600;color:var(--muted);border:1px solid var(--line);
+  border-radius:999px;padding:3px 8px;letter-spacing:0}
+
+.toast{position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom));transform:translate(-50%,16px);
+  background:rgba(23,23,23,.92);color:#fff;font-size:13px;padding:9px 18px;border-radius:999px;
+  z-index:60;opacity:0;pointer-events:none;transition:.24s;white-space:nowrap}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+.empty{background:#fff;border-radius:20px;padding:44px 26px;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.7}
+.empty .big{font-size:34px;margin-bottom:10px}
+.empty b{display:block;font-size:17px;color:var(--ink);margin-bottom:6px}
+.empty button{margin-top:16px;border:0;border-radius:12px;background:var(--ink);color:#fff;
+  font-size:14px;font-weight:700;padding:11px 22px;cursor:pointer}
+
+.totop{position:fixed;right:16px;bottom:calc(22px + env(safe-area-inset-bottom));z-index:25;
+  width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.94);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  color:#6f6c66;font-size:17px;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,.1);
+  opacity:0;transform:translateY(8px);pointer-events:none;transition:.2s;padding:0}
+.totop.show{opacity:1;transform:none;pointer-events:auto}
+
+@media (max-width:380px){
+  .q{font-size:18px}
+  .opt{font-size:15px;padding:12px 13px}
+  .brand{font-size:18.5px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<main id="app"></main>
+<button class="totop" id="totop" aria-label="回到顶部">↑</button>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const DATA = [{"ch":"第一章 生命与健康","sec":"第一节 身心健康","type":"single","q":"健康是指()","opts":[["A","身体没有疾病或虚弱"],["B","体格强壮"],["C","身体、心理和社会适应的完整状态"]],"ans":["C"],"id":1},{"ch":"第一章 生命与健康","sec":"第一节 身心健康","type":"judge","q":"健康是指身体、心理和社会适应的完整状态,而不仅仅是没有疾病或虚弱。()","opts":[],"ans":["正确"],"id":2},{"ch":"第一章 生命与健康","sec":"第二节 健康第一责任人","type":"multi","q":"提高健康素养将有助于塑造自主自律的健康行为,包括()","opts":[["A","了解饮食和营养的基本原则,自觉抵制烟酒对健康的损害"],["B","认识定期参加体育活动的重要性"],["C","避免不安全性行为和毒品危害"],["D","知晓常见心理健康问题的迹象,以及维持良好社会关系的价值"]],"ans":["A","B","C","D"],"id":3},{"ch":"第一章 生命与健康","sec":"第二节 健康第一责任人","type":"judge","q":"个人是健康的第一责任人。()","opts":[],"ans":["正确"],"id":4},{"ch":"第一章 生命与健康","sec":"第三节 应急第一响应人","type":"multi","q":"急救第一响应人是指在现场为受到伤害、突发疾病者提供紧急救护的人,他们可以是(),他们平时参加急救培训、获取证书,在事发现场利用所学知识和技能去救助伤病者。","opts":[["A","亲属"],["B","朋友、路人、警察、消防员"],["C","医疗专业人员"]],"ans":["A","B","C"],"id":5},{"ch":"第一章 生命与健康","sec":"第三节 应急第一响应人","type":"judge","q":"急救第一响应人是指在现场为受到伤害、突发疾病者提供紧急救护的人。()","opts":[],"ans":["正确"],"id":6},{"ch":"第四章 心理健康与精神障碍辨识","sec":"作业1","type":"single","q":"下面哪项 (不是) 心理健康的标准？( )","opts":[["A","有充分的安全感"],["B","能适度地表达和控制自己的情绪"],["C","拥有完美的自我人格"],["D","对自己有较充分的了解"],["E","能保持适当和良好的人际关系"]],"ans":["C"],"id":148},{"ch":"第四章 心理健康与精神障碍辨识","sec":"作业1","type":"multi","q":"完全健康是指哪几方面都健康：()","opts":[["A","身体"],["B","心理"],["C","社会适应"],["D","精神"],["E","道德"]],"ans":["A","B","C","E"],"id":149},{"ch":"第四章 心理健康与精神障碍辨识","sec":"作业1","type":"judge","q":"心理健康是指一种高效而满意的、持续的心理状态。()","opts":[],"ans":["正确"],"id":150},{"ch":"第四章 心理健康与精神障碍辨识","sec":"作业2","type":"single","q":"学者提出的心理健康的“灰色理论”概念中,深灰色区域的人是( )","opts":[["A","精神分裂症患者"],["B","生活压力引起的心理冲突"],["C","自信心强、适应力强的人"],["D","患有异常人格障碍的人"],["E","婚恋问题"]],"ans":["D"],"id":151},{"ch":"第四章 心理健康与精神障碍辨识","sec":"作业2","type":"multi","q":"判别心理是否正常的原则包括:()","opts":[["A","心理活动的自治性"],["B","主客观世界的统一性"],["C","人格的相对稳定性"],["D","精神世界的丰富性"],["E","心理活动的内在协调性"]],"ans":["B","C","E"],"id":152},{"ch":"第四章 心理健康与精神障碍辨识","sec":"作业2","type":"judge","q":"正常心理与异常心理之间有明确的界限,可以通过三原则进行判别。()","opts":[],"ans":["错误"],"id":153},{"ch":"第四章 心理健康与精神障碍辨识","sec":"作业3","type":"single","q":"下列哪项不是抑郁障碍的表现()","opts":[["A","情绪低落"],["B","情绪高涨"],["C","思维迟缓"],["D","活动减少"],["E","自伤自杀"]],"ans":["B"],"id":154},{"ch":"第四章 心理健康与精神障碍辨识","sec":"作业3","type":"single","q":"焦虑障碍的临床表现包括()","opts":[["A","紧张不安"],["B","注意力不集中"],["C","心悸,胸闷,出汗"],["D","尿频,尿急,口干,便秘"],["E","以上都是"]],"ans":["E"],"id":155},{"ch":"第四章 心理健康与精神障碍辨识","sec":"作业3","type":"single","q":"关于睡眠障碍,下列说法(错误)的是 ()","opts":[["A","失眠"],["B","白天瞌睡过多"],["C","梦魇"],["D","正常人25小时有一次觉醒和睡眠的节律性交替"],["E","睡眠节律紊乱"]],"ans":["D"],"id":156},{"ch":"第四章 心理健康与精神障碍辨识","sec":"作业3","type":"judge","q":"神经性厌食为故意限制饮食,使体重明显低于正常标准。()","opts":[],"ans":["正确"],"id":157},{"ch":"第四章 心理健康与精神障碍辨识","sec":"作业3","type":"judge","q":"神经性贪食是指短时间摄入大量食物、进食时常避开人。()","opts":[],"ans":["正确"],"id":158},{"ch":"第四章 心理健康与精神障碍辨识","sec":"作业3","type":"judge","q":"抑郁症的三无症状是指无助、无望、无价值。()","opts":[],"ans":["正确"],"id":159}];
+const CHAPTER_META = [{"ch":"第一章 生命与健康","count":6,"secs":3},{"ch":"第二章 基本急救技术","count":59,"secs":6},{"ch":"第三章 常见外伤与突发疾病的处置","count":82,"secs":11},{"ch":"第四章 心理健康与精神障碍辨识","count":12,"secs":3},{"ch":"第五章 促进与维护心理健康技能","count":21,"secs":4},{"ch":"第六章 心理急救与心理支持技能","count":23,"secs":4}];
+const TRIAL_CHAPTERS = new Set(["第一章 生命与健康", "第四章 心理健康与精神障碍辨识"]);
+const TOTAL_Q = CHAPTER_META.reduce((n, c) => n + c.count, 0);
+
+const TYPE_LABEL = {single:'单选', multi:'多选', judge:'判断'};
+const $ = s => document.querySelector(s);
+const app = $('#app');
+const totop = $('#totop');
+
+/* ---------- build chapter / section structure ---------- */
+function parseHead(title, unit){
+  const m = String(title).match(new RegExp('^(第[一二三四五六七八九十]+' + unit + ')\\s*(.*)$'));
+  return m ? { no: m[1], name: m[2] } : { no: '', name: title };
+}
+
+const CH = [];
+const IDX = {};
+(function build(){
+  const map = new Map();
+  CHAPTER_META.forEach(meta => {
+    const p = parseHead(meta.ch, '章');
+    const ch = {
+      no: p.no, name: p.name, title: meta.ch, secs: [], secMap: new Map(),
+      count: meta.count, secCount: meta.secs, locked: !TRIAL_CHAPTERS.has(meta.ch)
+    };
+    map.set(meta.ch, ch);
+    CH.push(ch);
+  });
+  DATA.forEach(q => {
+    const ch = map.get(q.ch);
+    if (!ch || ch.locked) return;
+    let sec = ch.secMap.get(q.sec);
+    if (!sec){
+      const p = parseHead(q.sec, '节');
+      sec = { no: p.no, name: p.name, title: (p.no ? p.no + ' ' + p.name : p.name), qs: [] };
+      ch.secMap.set(q.sec, sec);
+      ch.secs.push(sec);
+    }
+    sec.qs.push(q);
+    IDX[q.id] = { ci: CH.indexOf(ch), si: ch.secs.indexOf(sec) };
+  });
+})();
+
+let homeKw = '';
+let currentView = 'home';
+let searchTimer = null;
+
+/* ---------- helpers ---------- */
+function esc(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+function hl(text, kw){
+  const safe = esc(text);
+  if (!kw) return safe;
+  try {
+    return safe.replace(new RegExp('(' + escRe(esc(kw)) + ')', 'gi'), '<mark>$1</mark>');
+  } catch(e){ return safe; }
+}
+function parseHash(){
+  const h = location.hash || '#/';
+  const m = h.match(/^#\/c\/(\d+)(?:\/(\d+))?(?:\/(\d+))?$/);
+  if (m){
+    const ci = +m[1];
+    if (!CH[ci] || CH[ci].locked) return { view:'home' };
+    if (m[2] === undefined) return { view:'chapter', ci };
+    const si = +m[2];
+    if (!CH[ci].secs[si]) return { view:'chapter', ci };
+    return { view:'feed', ci, si, qid: m[3] ? +m[3] : null };
+  }
+  return { view:'home' };
+}
+function syncHeadHeight(){
+  const h = document.querySelector('.topbar');
+  document.documentElement.style.setProperty('--head-h', h ? h.offsetHeight + 'px' : '0px');
+}
+function optionList(q){
+  return q.type === 'judge' ? [['正确','正确'],['错误','错误']] : q.opts;
+}
+function shortAnswer(q){
+  return q.type === 'judge' ? q.ans[0] + (q.ans[0] === '正确' ? ' ✓' : ' ✕') : q.ans.join('、');
+}
+function correctText(q){
+  if (q.type === 'judge') return '';
+  return q.ans.map(l => {
+    const o = q.opts.find(x => x[0] === l);
+    return o ? o[1] : '';
+  }).filter(Boolean).join('；');
+}
+function searchMatches(kw){
+  const k = kw.toLowerCase();
+  return DATA.filter(q =>
+    [q.q, q.ch, q.sec, ...q.opts.map(o => o[1])].join('\n').toLowerCase().includes(k)
+  );
+}
+
+/* ---------- views ---------- */
+function homeCountHTML(isSearch){
+  if (isSearch) return `<b>${searchMatches(homeKw).length}</b><span class="count-total"> 题命中</span>`;
+  return `<b>${DATA.length}</b><span class="count-total"> / ${TOTAL_Q}</span> 题`;
+}
+
+function renderHome(){
+  currentView = 'home';
+  const hasKw = !!homeKw;
+  app.innerHTML = `
+    <header class="topbar">
+      <div class="home-head">
+        <div class="brand-row">
+          <div class="brand"><span class="dot"></span>急救题库<small>试用版</small></div>
+          <div class="count" id="homeCount">${homeCountHTML(hasKw)}</div>
+        </div>
+        <label class="search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+          <input id="searchInput" type="search" placeholder="搜索第一、四章题目或关键词" autocomplete="off"
+            enterkeyhint="search" value="${esc(homeKw)}">
+          <button type="button" class="clear" id="clearSearch" ${hasKw ? '' : 'hidden'} aria-label="清除搜索">✕</button>
+        </label>
+      </div>
+    </header>
+    <div class="page"><div id="homeList">${hasKw ? resultsHTML(homeKw) : directoryHTML()}</div></div>`;
+
+}
+
+function directoryHTML(){
+  const totalSecs = CH.reduce((n, c) => n + c.secCount, 0);
+  return `<div class="list-head"><b>选择章节</b><span>${CH.length} 章 · ${totalSecs} 节 · 试用 ${DATA.length} 题</span></div>` +
+    CH.map((ch, ci) => ch.locked ? `
+      <button class="ch-card locked" type="button" data-locked="1" aria-disabled="true">
+        <span class="ch-num">${String(ci + 1).padStart(2, '0')}</span>
+        <span class="ch-main">
+          <span class="ch-title">${esc(ch.name)}</span>
+          <span class="ch-sub">${esc(ch.no)} · ${ch.secCount} 节 · ${ch.count} 题</span>
+        </span>
+        <span class="ch-lock">未开放</span>
+      </button>` : `
+      <button class="ch-card" data-nav="#/c/${ci}">
+        <span class="ch-num">${String(ci + 1).padStart(2, '0')}</span>
+        <span class="ch-main">
+          <span class="ch-title">${esc(ch.name)}</span>
+          <span class="ch-sub">${esc(ch.no)} · ${ch.secs.length} 节 · ${ch.count} 题</span>
+        </span>
+        <span class="chev">›</span>
+      </button>`).join('') +
+    `<div class="profile">
+      <div class="profile-label">小红书号</div>
+      <button class="profile-id" id="copyId">w9264542586<span class="copy">复制</span></button>
+    </div>`;
+}
+
+function resultsHTML(kw){
+  const list = searchMatches(kw);
+  if (!list.length){
+    return `<div class="empty">
+      <div class="big">🔍</div>
+      <b>没有找到相关题目</b>
+      试用版仅收录第一、四章，完整版可搜索全部 203 题<br>换个关键词试试
+      <div><button id="clearSearchInline">清除搜索</button></div>
+    </div>`;
+  }
+  return `<div class="list-head"><b>搜索结果</b><span>${list.length} 题</span></div>
+    <div class="res-list">` +
+    list.map(q => {
+      const { ci, si } = IDX[q.id];
+      const ch = CH[ci], sec = ch.secs[si];
+      const txt = correctText(q);
+      return `<a class="res" href="#/c/${ci}/${si}/${q.id}">
+        <div class="res-top">
+          <span class="res-path">${esc(ch.no)} · ${esc(sec.title)}</span>
+          <span class="tag ${q.type}">${TYPE_LABEL[q.type]}</span>
+        </div>
+        <div class="res-q">${hl(q.q, kw)}</div>
+        <div class="res-ans"><span class="lab">答案</span><b>${esc(shortAnswer(q))}</b>${txt ? `<span class="res-text">${hl(txt, kw)}</span>` : ''}</div>
+      </a>`;
+    }).join('') + `</div>`;
+}
+
+function updateHome(){
+  if (currentView !== 'home') return;
+  const listEl = $('#homeList');
+  if (!listEl) return;
+  listEl.innerHTML = homeKw ? resultsHTML(homeKw) : directoryHTML();
+  const c = $('#homeCount');
+  if (c) c.innerHTML = homeCountHTML(!!homeKw);
+}
+
+function renderChapter(ci){
+  const ch = CH[ci];
+  if (!ch || ch.locked){ renderHome(); return; }
+  currentView = 'chapter';
+  const rows = ch.secs.map((sec, si) => `
+    <button class="sec-row" data-nav="#/c/${ci}/${si}">
+      <span class="sec-main">
+        <span class="sec-title">${esc(sec.title)}</span>
+        <span class="sec-sub">${sec.qs.length} 题</span>
+      </span>
+      <span class="chev">›</span>
+    </button>`).join('');
+  app.innerHTML = `
+    <header class="topbar">
+      <div class="subbar-inner">
+        <button class="icon-btn" data-nav="#/" aria-label="返回目录">‹</button>
+        <div class="bar-title"><div class="crumb">目录</div><h1>${esc(ch.name)}</h1></div>
+        <span class="bar-count">${ch.count} 题</span>
+      </div>
+    </header>
+    <div class="page">
+      <div class="list-head"><b>${esc(ch.no)} · 共 ${ch.secs.length} 节</b><span>${ch.count} 题</span></div>
+      <div class="sec-list">${rows}</div>
+    </div>`;
+}
+
+function cardHTML(q){
+  const correct = new Set(q.ans);
+  const isJudge = q.type === 'judge';
+  const optsHTML = optionList(q).map(([letter, text]) => {
+    const good = correct.has(letter);
+    const key = isJudge ? (letter === '正确' ? '✓' : '✕') : letter;
+    return `<div class="opt${good ? ' correct' : ''}">
+      <span class="key">${esc(key)}</span>
+      <span class="txt">${esc(text)}</span>
+      <span class="mark">✓</span>
+    </div>`;
+  }).join('');
+  return `<article class="card" data-id="${q.id}">
+    <div class="meta">
+      <span class="chapter">${esc(q.ch)}</span>
+      <span class="meta-right">
+        <span class="tag ${q.type}">${TYPE_LABEL[q.type]}</span>
+        <span class="qnum">No.${String(q.id).padStart(3, '0')}</span>
+      </span>
+    </div>
+    <h2 class="q">${esc(q.q)}</h2>
+    <div class="opts">${optsHTML}</div>
+    <div class="swipe-hint">· 上滑下一题 ·</div>
+  </article>`;
+}
+
+function endHTML(ci, si){
+  const ch = CH[ci];
+  const sec = ch.secs[si];
+  let next = null;
+  if (ch.secs[si + 1]) next = { href:`#/c/${ci}/${si + 1}`, label:`下一节 · ${ch.secs[si + 1].title}` };
+  else if (CH[ci + 1] && !CH[ci + 1].locked) next = { href:`#/c/${ci + 1}/0`, label:`下一章 · ${CH[ci + 1].name}` };
+  return `<section class="end-card">
+    <div class="end-ic">✓</div>
+    <b>本节看完了</b>
+    <p>共 ${sec.qs.length} 题</p>
+    ${next ? `<button class="btn primary" data-nav="${next.href}">${esc(next.label)} →</button>` : ''}
+    ${next ? '' : '<div class="trial-note">试用版仅开放第一、四章<br>完整版共 203 题</div>'}
+    <button class="btn" data-nav="#/">返回目录</button>
+  </section>`;
+}
+
+function renderFeed(ci, si, qid){
+  const ch = CH[ci], sec = ch && ch.secs[si];
+  if (!ch || ch.locked || !sec){ renderHome(); return; }
+  currentView = 'feed';
+  app.innerHTML = `
+    <header class="topbar">
+      <div class="subbar-inner">
+        <button class="icon-btn" data-nav="#/c/${ci}" aria-label="返回小节列表">‹</button>
+        <div class="bar-title">
+          <div class="crumb">${esc(ch.no)} · ${esc(ch.name)}</div>
+          <h1>${esc(sec.title)}</h1>
+        </div>
+        <span class="bar-count">${sec.qs.length} 题</span>
+      </div>
+    </header>
+    <main class="feed">${sec.qs.map(cardHTML).join('')}${endHTML(ci, si)}</main>`;
+}
+
+/* ---------- routing ---------- */
+function route(){
+  const r = parseHash();
+  if (r.view === 'home' && /^#\/c\//.test(location.hash)) history.replaceState(null, '', '#/');
+  if (r.view === 'chapter') renderChapter(r.ci);
+  else if (r.view === 'feed') renderFeed(r.ci, r.si, r.qid);
+  else renderHome();
+
+  window.scrollTo(0, 0);
+  totop.classList.remove('show');
+  requestAnimationFrame(() => {
+    syncHeadHeight();
+    const h = document.querySelector('.topbar');
+    if (h && observer){ observer.disconnect(); observer.observe(h); }
+    if (r.view === 'feed' && r.qid) jumpTo(r.qid);
+  });
+}
+
+let observer = null;
+if ('ResizeObserver' in window){
+  observer = new ResizeObserver(() => syncHeadHeight());
+}
+
+function jumpTo(qid){
+  const el = document.querySelector(`.card[data-id="${qid}"]`);
+  if (!el) return;
+  requestAnimationFrame(() => {
+    el.scrollIntoView({ block: 'start' });
+    el.classList.add('jump');
+    setTimeout(() => el.classList.remove('jump'), 1800);
+  });
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click', e => {
+  if (e.target.closest('[data-locked]')){
+    toast('试用版仅开放第一、四章');
+    return;
+  }
+  const nav = e.target.closest('[data-nav]');
+  if (nav){
+    const href = nav.getAttribute('data-nav');
+    if (location.hash === href) route();
+    else location.hash = href;
+    return;
+  }
+  if (e.target.closest('#clearSearch') || e.target.closest('#clearSearchInline')){
+    clearSearch();
+    return;
+  }
+  if (e.target.closest('#copyId')){
+    copyText('w9264542586');
+  }
+});
+
+function copyText(text){
+  const ok = () => toast('已复制：' + text);
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(ok).catch(() => fallbackCopy(text, ok));
+  } else {
+    fallbackCopy(text, ok);
+  }
+}
+function fallbackCopy(text, done){
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); done(); } catch(e){}
+  ta.remove();
+}
+let toastTimer = null;
+function toast(msg){
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+document.addEventListener('input', e => {
+  if (!e.target || e.target.id !== 'searchInput') return;
+  homeKw = e.target.value.trim();
+  const btn = $('#clearSearch');
+  if (btn) btn.hidden = !e.target.value;
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(updateHome, 120);
+});
+
+document.addEventListener('keydown', e => {
+  if (e.target && e.target.id === 'searchInput'){
+    if (e.key === 'Escape'){
+      e.target.value = '';
+      homeKw = '';
+      const btn = $('#clearSearch');
+      if (btn) btn.hidden = true;
+      updateHome();
+    }
+    if (e.key === 'Enter') e.target.blur();
+  }
+});
+
+function clearSearch(){
+  homeKw = '';
+  const inp = $('#searchInput');
+  if (inp){ inp.value = ''; inp.focus(); }
+  const btn = $('#clearSearch');
+  if (btn) btn.hidden = true;
+  updateHome();
+}
+
+let ticking = false;
+window.addEventListener('scroll', () => {
+  if (ticking) return;
+  ticking = true;
+  requestAnimationFrame(() => {
+    totop.classList.toggle('show', currentView === 'feed' && window.scrollY > 1400);
+    ticking = false;
+  });
+}, {passive: true});
+
+totop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+window.addEventListener('hashchange', route);
+window.addEventListener('orientationchange', () => setTimeout(syncHeadHeight, 250));
+route();
+</script>
+</body>
+</html>
